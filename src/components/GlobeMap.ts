@@ -16,7 +16,7 @@
 
 import Globe from 'globe.gl';
 import type { GlobeInstance, ConfigOptions } from 'globe.gl';
-import { INTEL_HOTSPOTS, CONFLICT_ZONES, MILITARY_BASES, NUCLEAR_FACILITIES, SPACEPORTS, ECONOMIC_CENTERS, STRATEGIC_WATERWAYS, CRITICAL_MINERALS, UNDERSEA_CABLES } from '@/config/geo';
+import { INTEL_HOTSPOTS, CONFLICT_ZONES, GEOPOLITICAL_BOUNDARIES, MILITARY_BASES, NUCLEAR_FACILITIES, SPACEPORTS, ECONOMIC_CENTERS, STRATEGIC_WATERWAYS, CRITICAL_MINERALS, UNDERSEA_CABLES } from '@/config/geo';
 import { PIPELINES } from '@/config/pipelines';
 import { resolveTradeRouteSegments, type TradeRouteSegment } from '@/config/trade-routes';
 import { GAMMA_IRRADIATORS } from '@/config/irradiators';
@@ -961,6 +961,7 @@ export class GlobeMap {
       { key: 'iranAttacks',  label: 'Iran Attacks',          icon: '&#127919;' },
       { key: 'hotspots',     label: 'Intel Hotspots',        icon: '&#127919;' },
       { key: 'conflicts',    label: 'Conflict Zones',         icon: '&#9876;'   },
+      { key: 'geopoliticalBoundaries', label: 'Geopolitical Boundaries', icon: '&#9878;' },
       { key: 'bases',        label: 'Military Bases',         icon: '&#127963;' },
       { key: 'nuclear',      label: 'Nuclear Sites',          icon: '&#9762;'   },
       { key: 'irradiators',  label: 'Gamma Irradiators',      icon: '&#9888;'   },
@@ -1089,6 +1090,7 @@ export class GlobeMap {
     this.globe.htmlElementsData(markers);
     this.flushArcs();
     this.flushPaths();
+    this.flushPolygons();
   }
 
   private flushArcs(): void {
@@ -1140,6 +1142,24 @@ export class GlobeMap {
       .pathDashGap((d: GlobePath) => d.pathType === 'cable' ? 0 : 0.25)
       .pathDashAnimateTime((d: GlobePath) => d.pathType === 'cable' ? 0 : 5000)
       .pathLabel((d: GlobePath) => d.name);
+  }
+
+  private flushPolygons(): void {
+    if (!this.globe || !this.initialized) return;
+    const polys = this.layers.geopoliticalBoundaries
+      ? GEOPOLITICAL_BOUNDARIES.map(b => ({
+          coords: [b.coords],
+          name: b.name,
+          boundaryType: b.boundaryType,
+        }))
+      : [];
+    (this.globe as any)
+      .polygonsData(polys)
+      .polygonCapColor(() => 'rgba(255, 60, 60, 0.15)')
+      .polygonSideColor(() => 'rgba(255, 60, 60, 0.08)')
+      .polygonStrokeColor(() => '#ff4444')
+      .polygonAltitude(0.005)
+      .polygonLabel((d: { name: string }) => d.name);
   }
 
   // ─── Public data setters ──────────────────────────────────────────────────
