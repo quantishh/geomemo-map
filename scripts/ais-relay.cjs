@@ -1930,17 +1930,19 @@ const CII_COUNTRY_NAMES = {
   PK: 'Pakistan', SY: 'Syria', YE: 'Yemen', MM: 'Myanmar', VE: 'Venezuela',
 };
 const CII_COUNTRY_KEYWORDS = {
-  US: ['united states', 'usa', 'america', 'washington'],
-  RU: ['russia', 'moscow', 'kremlin'], CN: ['china', 'beijing'],
-  UA: ['ukraine', 'kyiv'], IR: ['iran', 'tehran'],
-  IL: ['israel', 'tel aviv', 'gaza'], TW: ['taiwan', 'taipei'],
-  KP: ['north korea', 'pyongyang'], SA: ['saudi arabia', 'riyadh'],
-  TR: ['turkey', 'ankara'], PL: ['poland', 'warsaw'],
-  DE: ['germany', 'berlin'], FR: ['france', 'paris'],
-  GB: ['britain', 'uk', 'london'], IN: ['india', 'delhi'],
-  PK: ['pakistan', 'islamabad'], SY: ['syria', 'damascus'],
-  YE: ['yemen', 'sanaa', 'houthi'], MM: ['myanmar', 'burma'],
-  VE: ['venezuela', 'caracas'],
+  US: ['united states', 'usa', 'america', 'washington', 'biden', 'trump', 'pentagon'],
+  RU: ['russia', 'moscow', 'kremlin', 'putin'],
+  CN: ['china', 'beijing', 'xi jinping', 'prc'],
+  UA: ['ukraine', 'kyiv', 'zelensky', 'donbas'],
+  IR: ['iran', 'tehran', 'khamenei', 'irgc'],
+  IL: ['israel', 'tel aviv', 'netanyahu', 'idf', 'gaza'],
+  TW: ['taiwan', 'taipei'], KP: ['north korea', 'pyongyang', 'kim jong'],
+  SA: ['saudi arabia', 'riyadh'], TR: ['turkey', 'ankara', 'erdogan'],
+  PL: ['poland', 'warsaw'], DE: ['germany', 'berlin'],
+  FR: ['france', 'paris', 'macron'], GB: ['britain', 'uk', 'london'],
+  IN: ['india', 'delhi', 'modi'], PK: ['pakistan', 'islamabad'],
+  SY: ['syria', 'damascus'], YE: ['yemen', 'sanaa', 'houthi'],
+  MM: ['myanmar', 'burma'], VE: ['venezuela', 'caracas', 'maduro'],
 };
 
 const CII_ZONE_COUNTRY_MAP = {
@@ -2168,15 +2170,13 @@ async function seedCiiScores() {
       const adjustedProtests = isHighVolume
         ? Math.log2(protestCount + 1) * mult * 5
         : protestCount * mult;
-      const unrest = ciiClamp(adjustedProtests * 8 + Math.min(50, (c.riots * 2 * mult * 5)) + (outageBoosts[code] || 0), 0, 100);
+      const unrest = ciiClamp(adjustedProtests * 8 + (outageBoosts[code] || 0), 0, 100);
 
       const battleScore = Math.min(50, (c.battles * 3 + c.explosions * 4 + c.civilian * 5) * mult);
       const fatalityScore = Math.min(40, Math.sqrt(c.fatalities) * 5 * mult);
       const civilianBoost = c.civilian > 0 ? Math.min(10, c.civilian * 3) : 0;
-      const conflict = ciiClamp(
-        Math.max(battleScore + fatalityScore + civilianBoost, ucdpFloors[code] || 0) + (iranStrikeBoosts[code] || 0),
-        0, 100,
-      );
+      const acledConflict = battleScore + fatalityScore + civilianBoost + (iranStrikeBoosts[code] || 0);
+      const conflict = ciiClamp(Math.max(acledConflict, ucdpFloors[code] || 0), 0, 100);
 
       const security = ciiClamp(gpsBoosts[code] || 0, 0, 100);
       const information = 0;
