@@ -465,7 +465,7 @@ const FINANCE_MOBILE_MAP_LAYERS: MapLayers = {
 // HAPPY VARIANT (Good News & Progress)
 // kept for backward compatibility but not used
 // ============================================
-const _HAPPY_PANELS: Record<string, PanelConfig> = {
+export const _HAPPY_PANELS: Record<string, PanelConfig> = {
   map: { name: 'World Map', enabled: true, priority: 1 },
   'positive-feed': { name: 'Good News Feed', enabled: true, priority: 1 },
   progress: { name: 'Human Progress', enabled: true, priority: 1 },
@@ -478,7 +478,7 @@ const _HAPPY_PANELS: Record<string, PanelConfig> = {
   giving: { name: 'Global Giving', enabled: true, priority: 1 },
 };
 
-const _HAPPY_MAP_LAYERS: MapLayers = {
+export const _HAPPY_MAP_LAYERS: MapLayers = {
   gpsJamming: false,
   geopoliticalBoundaries: false,
   conflicts: false,
@@ -532,7 +532,7 @@ const _HAPPY_MAP_LAYERS: MapLayers = {
   geomemoIntel: false,
 };
 
-const _HAPPY_MOBILE_MAP_LAYERS: MapLayers = {
+export const _HAPPY_MOBILE_MAP_LAYERS: MapLayers = {
   gpsJamming: false,
   geopoliticalBoundaries: false,
   conflicts: false,
