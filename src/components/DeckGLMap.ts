@@ -321,6 +321,20 @@ export class DeckGLMap {
   private positiveEvents: PositiveGeoEvent[] = [];
   private kindnessPoints: KindnessPoint[] = [];
 
+  // GeoMemo Intelligence layer data
+  private geomemoArticles: Array<{
+    id: number;
+    headline: string;
+    summary: string;
+    category: string;
+    source: string;
+    url: string;
+    timestamp: string;
+    confidence: number;
+    country: string;
+    coordinates: [number, number];
+  }> = [];
+
   // Phase 8 overlay data
   private happinessScores: Map<string, number> = new Map();
   private happinessYear = 0;
@@ -1050,6 +1064,11 @@ export class DeckGLMap {
     const filteredMilitaryVesselClusters = mapLayers.military ? this.filterMilitaryVesselClustersByTime(this.militaryVesselClusters) : [];
     // UCDP is a historical dataset (events aged months); time-range filter always zeroes it out
     const filteredUcdpEvents = mapLayers.ucdpEvents ? this.ucdpEvents : [];
+
+    // GeoMemo Intelligence layer
+    if (mapLayers.geomemoIntel && this.geomemoArticles.length > 0) {
+      layers.push(this.createGeomemoIntelLayer());
+    }
 
     // Day/night overlay (rendered first as background)
     if (mapLayers.dayNight) {
@@ -2453,6 +2472,36 @@ export class DeckGLMap {
     });
   }
 
+  // GeoMemo Intelligence layer — category-colored article pins
+  private static readonly GEOMEMO_CATEGORY_COLORS: Record<string, [number, number, number, number]> = {
+    'Geopolitical Conflict': [220, 38, 38, 220],
+    'Geopolitical Economics': [59, 130, 246, 220],
+    'Global Markets': [34, 197, 94, 220],
+    'Geopolitical Politics': [234, 179, 8, 220],
+    'GeoNatDisaster': [249, 115, 22, 220],
+    'GeoLocal': [156, 163, 175, 200],
+    'Other': [156, 163, 175, 180],
+  };
+
+  private createGeomemoIntelLayer(): ScatterplotLayer {
+    return new ScatterplotLayer({
+      id: 'geomemo-intel-layer',
+      data: this.geomemoArticles,
+      getPosition: (d) => d.coordinates,
+      getRadius: 15000,
+      getFillColor: (d) =>
+        DeckGLMap.GEOMEMO_CATEGORY_COLORS[d.category] ||
+        DeckGLMap.GEOMEMO_CATEGORY_COLORS['Other'],
+      radiusMinPixels: 5,
+      radiusMaxPixels: 14,
+      pickable: true,
+      stroked: true,
+      getLineColor: [255, 255, 255, 80] as [number, number, number, number],
+      lineWidthMinPixels: 1,
+      antialiasing: true,
+    });
+  }
+
   private pulseTime = 0;
 
   private canPulse(now = Date.now()): boolean {
@@ -2928,6 +2977,8 @@ export class DeckGLMap {
         return { html: `<div class="deckgl-tooltip"><strong>${t('popups.cyberThreat.title')}</strong><br/>${text(obj.severity || t('components.deckgl.tooltip.medium'))} · ${text(obj.country || t('popups.unknown'))}</div>` };
       case 'iran-events-layer':
         return { html: `<div class="deckgl-tooltip"><strong>${t('components.deckgl.layers.iranAttacks')}: ${text(obj.category || '')}</strong><br/>${text((obj.title || '').slice(0, 80))}</div>` };
+      case 'geomemo-intel-layer':
+        return { html: `<div class="deckgl-tooltip"><strong>📰 ${text((obj.headline || '').slice(0, 80))}</strong><br/><span style="opacity:.7">${text(obj.source)} · ${text(obj.country)}</span></div>` };
       case 'news-locations-layer':
         return { html: `<div class="deckgl-tooltip"><strong>📰 ${t('components.deckgl.tooltip.news')}</strong><br/>${text(obj.title?.slice(0, 80) || '')}</div>` };
       case 'positive-events-layer': {
@@ -3145,6 +3196,39 @@ export class DeckGLMap {
           y: info.y,
         });
       }
+      return;
+    }
+
+    // GeoMemo Intel: show article popup with summary and link
+    if (layerId === 'geomemo-intel-layer') {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const article = info.object as any;
+      const categoryIcons: Record<string, string> = {
+        'Geopolitical Conflict': '🔴',
+        'Geopolitical Economics': '🔵',
+        'Global Markets': '🟢',
+        'Geopolitical Politics': '🟡',
+        'GeoNatDisaster': '🟠',
+        'GeoLocal': '⚪',
+      };
+      const icon = categoryIcons[article.category] || '📰';
+      const ts = article.timestamp ? new Date(article.timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
+      const summaryTruncated = (article.summary || '').length > 300
+        ? article.summary.slice(0, 300) + '…'
+        : article.summary || '';
+      const linkHtml = article.url
+        ? `<a href="${escapeHtml(article.url)}" target="_blank" rel="noopener noreferrer" style="color:#7c3aed;text-decoration:none;font-weight:600;display:inline-block;margin-top:6px">Read full article →</a>`
+        : '';
+      this.popup.showRawHtml(
+        `<div style="max-width:340px;font-family:system-ui,sans-serif">
+          <div style="font-size:11px;opacity:.6;margin-bottom:4px">${icon} ${escapeHtml(article.category || 'News')} · ${escapeHtml(article.source || '')} · ${escapeHtml(ts)}</div>
+          <div style="font-size:14px;font-weight:700;line-height:1.3;margin-bottom:6px">${escapeHtml(article.headline || '')}</div>
+          <div style="font-size:12px;line-height:1.5;opacity:.85">${escapeHtml(summaryTruncated)}</div>
+          ${linkHtml}
+        </div>`,
+        info.x,
+        info.y,
+      );
       return;
     }
 
@@ -4140,6 +4224,11 @@ export class DeckGLMap {
 
   public setRenewableInstallations(installations: RenewableInstallation[]): void {
     this.renewableInstallations = installations;
+    this.render();
+  }
+
+  public setGeomemoArticles(articles: typeof this.geomemoArticles): void {
+    this.geomemoArticles = articles;
     this.render();
   }
 

@@ -223,6 +223,60 @@ export class MapPopup {
     }, 0);
   }
 
+  /**
+   * Show a popup with raw HTML content (for layers that don't use PopupType).
+   */
+  public showRawHtml(html: string, x: number, y: number): void {
+    this.hide();
+
+    this.isMobileSheet = isMobileDevice();
+    this.popup = document.createElement('div');
+    this.popup.className = this.isMobileSheet ? 'map-popup map-popup-sheet' : 'map-popup';
+
+    const closeBtn = `<button class="popup-close" aria-label="${t('common.close')}" style="position:absolute;top:6px;right:8px;background:none;border:none;cursor:pointer;font-size:18px;opacity:.5;color:inherit">✕</button>`;
+    this.popup.innerHTML = this.isMobileSheet
+      ? `<button class="map-popup-sheet-handle" aria-label="${t('common.close')}"></button><div style="padding:16px;position:relative">${closeBtn}${html}</div>`
+      : `<div style="padding:16px;position:relative">${closeBtn}${html}</div>`;
+
+    const containerRect = this.container.getBoundingClientRect();
+
+    if (this.isMobileSheet) {
+      this.popup.style.left = '';
+      this.popup.style.top = '';
+      this.popup.style.transform = '';
+    } else {
+      this.positionDesktopPopup({ type: 'hotspot', data: {} as never, x, y }, containerRect);
+    }
+
+    document.body.appendChild(this.popup);
+    this.popup.querySelector('.popup-close')?.addEventListener('click', () => this.hide());
+    this.popup.querySelector('.map-popup-sheet-handle')?.addEventListener('click', () => this.hide());
+
+    if (this.isMobileSheet) {
+      this.popup.addEventListener('touchstart', this.handleSheetTouchStart, { passive: true });
+      this.popup.addEventListener('touchmove', this.handleSheetTouchMove, { passive: false });
+      this.popup.addEventListener('touchend', this.handleSheetTouchEnd);
+      this.popup.addEventListener('touchcancel', this.handleSheetTouchEnd);
+      requestAnimationFrame(() => {
+        if (!this.popup) return;
+        this.popup.classList.add('open');
+        this.popup.addEventListener('transitionend', () => {
+          if (this.popup) this.popup.style.willChange = 'auto';
+        }, { once: true });
+      });
+    }
+
+    if (this.outsideListenerTimeoutId !== null) {
+      window.clearTimeout(this.outsideListenerTimeoutId);
+    }
+    this.outsideListenerTimeoutId = window.setTimeout(() => {
+      document.addEventListener('click', this.handleOutsideClick);
+      document.addEventListener('touchstart', this.handleOutsideClick);
+      document.addEventListener('keydown', this.handleEscapeKey);
+      this.outsideListenerTimeoutId = null;
+    }, 0);
+  }
+
   private positionDesktopPopup(data: PopupData, containerRect: DOMRect): void {
     if (!this.popup) return;
 

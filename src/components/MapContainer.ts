@@ -459,6 +459,13 @@ export class MapContainer {
     // SVG map does not support renewable installations layer
   }
 
+  public setGeomemoArticles(articles: Parameters<DeckGLMap['setGeomemoArticles']>[0]): void {
+    if (this.useDeckGL) {
+      this.deckGLMap?.setGeomemoArticles(articles);
+    }
+    // SVG and Globe maps do not support GeoMemo layer
+  }
+
   public updateHotspotActivity(news: NewsItem[]): void {
     if (this.useDeckGL) {
       this.deckGLMap?.updateHotspotActivity(news);

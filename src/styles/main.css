@@ -99,6 +99,11 @@
   --status-cached: #ffaa00;
   --status-unavailable: #ff4444;
 
+  /* GeoMemo brand */
+  --brand: #7c3aed;
+  --brand-dim: #6d28d9;
+  --brand-glow: rgba(124, 58, 237, 0.15);
+
   /* Legacy color aliases (used by existing var() references) */
   --red: #ff4444;
   --green: #44ff88;
@@ -180,6 +185,11 @@
   /* Panels */
   --panel-bg: #ffffff;
   --panel-border: #d4d4d4;
+
+  /* GeoMemo brand (light mode variant) */
+  --brand: #6d28d9;
+  --brand-dim: #5b21b6;
+  --brand-glow: rgba(109, 40, 217, 0.10);
 
   /* Map */
   --map-bg: #e8f0f8;
@@ -269,6 +279,7 @@ canvas,
   padding: 8px 16px;
   background: var(--surface);
   border-bottom: 1px solid var(--border);
+  box-shadow: 0 1px 0 var(--brand-glow);
   height: 40px;
   flex-shrink: 0;
 }
@@ -334,23 +345,23 @@ canvas,
 }
 
 .variant-option.active {
-  color: #9b59f0;
-  background: rgba(67, 2, 151, 0.15);
+  color: var(--brand);
+  background: var(--brand-glow);
   pointer-events: none;
 }
 
 
 .variant-option.active .variant-icon {
-  filter: grayscale(0%) drop-shadow(0 0 4px #9b59f0);
+  filter: grayscale(0%) drop-shadow(0 0 4px var(--brand));
 }
 
 .variant-option[data-variant="tech"].active {
-  color: #b07df0;
-  background: rgba(67, 2, 151, 0.12);
+  color: var(--brand);
+  background: var(--brand-glow);
 }
 
 .variant-option[data-variant="tech"].active .variant-icon {
-  filter: grayscale(0%) drop-shadow(0 0 4px #b07df0);
+  filter: grayscale(0%) drop-shadow(0 0 4px var(--brand));
 }
 
 .variant-divider {
@@ -399,10 +410,10 @@ canvas,
   align-items: center;
   gap: 12px;
   padding: 12px 14px;
-  background: linear-gradient(135deg, #1a2332 0%, #0f1923 100%);
-  border: 1px solid rgba(68, 255, 136, 0.25);
+  background: linear-gradient(135deg, #1a1a2e 0%, #0f0f1e 100%);
+  border: 1px solid rgba(124, 58, 237, 0.25);
   border-radius: 10px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(68, 255, 136, 0.08);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(124, 58, 237, 0.08);
   z-index: 10003;
   opacity: 0;
   transform: translateY(-20px);
@@ -13324,8 +13335,8 @@ a.prediction-link:hover {
 }
 
 .deckgl-layer-toggles .layer-toggle input[type="checkbox"]:checked {
-  background: var(--green);
-  border-color: var(--green);
+  background: var(--brand);
+  border-color: var(--brand);
 }
 
 .deckgl-layer-toggles .layer-toggle input[type="checkbox"]:checked::after {

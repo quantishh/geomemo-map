@@ -374,6 +374,11 @@ export class DataLoaderManager implements AppModule {
     if (SITE_VARIANT !== 'happy') tasks.push({ name: 'iranAttacks', task: runGuarded('iranAttacks', () => this.loadIranEvents()) });
     if (SITE_VARIANT !== 'happy' && (this.ctx.mapLayers.techEvents || SITE_VARIANT === 'tech')) tasks.push({ name: 'techEvents', task: runGuarded('techEvents', () => this.loadTechEvents()) });
 
+    // GeoMemo Intelligence layer (all non-happy variants)
+    if (SITE_VARIANT !== 'happy' && this.ctx.mapLayers.geomemoIntel) {
+      tasks.push({ name: 'geomemoIntel', task: runGuarded('geomemoIntel', () => this.loadGeomemoArticles()) });
+    }
+
     if (SITE_VARIANT === 'tech') {
       tasks.push({ name: 'techReadiness', task: runGuarded('techReadiness', () => (this.ctx.panels['tech-readiness'] as TechReadinessPanel)?.refresh()) });
     }
@@ -438,6 +443,9 @@ export class DataLoaderManager implements AppModule {
           break;
         case 'iranAttacks':
           await this.loadIranEvents();
+          break;
+        case 'geomemoIntel':
+          await this.loadGeomemoArticles();
           break;
         case 'ucdpEvents':
         case 'displacement':
@@ -2355,6 +2363,39 @@ export class DataLoaderManager implements AppModule {
       (this.ctx.panels['telegram-intel'] as TelegramIntelPanel)?.setData(result);
     } catch (error) {
       console.error('[App] Telegram intel fetch failed:', error);
+    }
+  }
+
+  async loadGeomemoArticles(): Promise<void> {
+    try {
+      const res = await fetch('/api/geomemo-news?days=7');
+      if (!res.ok) {
+        console.warn('[App] GeoMemo API returned', res.status);
+        return;
+      }
+      const geojson = await res.json();
+      if (!geojson?.features?.length) {
+        this.ctx.map?.setGeomemoArticles([]);
+        return;
+      }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const articles = geojson.features.map((f: any) => ({
+        id: f.properties?.id ?? 0,
+        headline: f.properties?.headline ?? '',
+        summary: f.properties?.summary ?? '',
+        category: f.properties?.category ?? 'Other',
+        source: f.properties?.source ?? '',
+        url: f.properties?.url ?? '',
+        timestamp: f.properties?.timestamp ?? '',
+        confidence: f.properties?.confidence ?? 0,
+        country: f.properties?.country ?? '',
+        coordinates: f.geometry?.coordinates as [number, number],
+      })).filter((a: { coordinates: [number, number] }) => a.coordinates?.[0] != null && a.coordinates?.[1] != null);
+      this.ctx.map?.setGeomemoArticles(articles);
+      console.log(`[App] GeoMemo: loaded ${articles.length} articles for map`);
+    } catch (error) {
+      console.error('[App] GeoMemo articles fetch failed:', error);
+      this.ctx.map?.setGeomemoArticles([]);
     }
   }
 }
