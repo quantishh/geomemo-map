@@ -7,6 +7,7 @@
 import type { CountryScore, ComponentScores } from './country-instability';
 import { setHasCachedScores } from './country-instability';
 import { getPersistentCache, setPersistentCache } from './persistent-cache';
+import { getHydratedData } from '@/services/bootstrap';
 import {
   IntelligenceServiceClient,
   type GetRiskScoresResponse,
@@ -175,6 +176,16 @@ export async function fetchCachedRiskScores(signal?: AbortSignal): Promise<Cache
   const now = Date.now();
 
   if (cachedScores && now - lastFetchTime < REFETCH_INTERVAL_MS) {
+    return cachedScores;
+  }
+
+  const hydrated = getHydratedData('ciiScores') as GetRiskScoresResponse | undefined;
+  if (hydrated?.ciiScores?.length) {
+    const data = toRiskScores(hydrated);
+    cachedScores = data;
+    lastFetchTime = now;
+    setHasCachedScores(true);
+    void setPersistentCache(RISK_CACHE_KEY, data);
     return cachedScores;
   }
 

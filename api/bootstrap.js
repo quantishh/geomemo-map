@@ -25,6 +25,7 @@ const BOOTSTRAP_CACHE_KEYS = {
   techReadiness:    'economic:worldbank-techreadiness:v1',
   positiveGeoEvents: 'positive-events:geo-bootstrap:v1',
   theaterPosture: 'theater-posture:sebuf:stale:v1',
+  ciiScores: 'risk:scores:sebuf:v1',
 };
 
 const SLOW_KEYS = new Set([
@@ -34,7 +35,7 @@ const SLOW_KEYS = new Set([
 ]);
 const FAST_KEYS = new Set([
   'earthquakes', 'outages', 'serviceStatuses', 'macroSignals', 'chokepoints',
-  'marketQuotes', 'commodityQuotes', 'positiveGeoEvents',
+  'marketQuotes', 'commodityQuotes', 'positiveGeoEvents', 'ciiScores',
 ]);
 
 const TIER_CACHE = {

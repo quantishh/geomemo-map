@@ -1,6 +1,7 @@
 import { Panel } from './Panel';
 import { getCSSColor } from '@/utils';
 import { calculateCII, type CountryScore } from '@/services/country-instability';
+import { toCountryScore, type CachedRiskScores } from '@/services/cached-risk-scores';
 import { t } from '../services/i18n';
 import { h, replaceChildren, rawHtml } from '@/utils/dom-utils';
 
@@ -143,6 +144,23 @@ export class CIIPanel extends Panel {
       console.error('[CIIPanel] Refresh error:', error);
       this.showError(t('common.failedCII'));
     }
+  }
+
+  public renderFromCached(cached: CachedRiskScores): void {
+    this.focalPointsReady = true;
+    this.scores = cached.cii.map(toCountryScore);
+    const withData = this.scores.filter(s => s.score > 0);
+    this.setCount(withData.length);
+
+    if (withData.length === 0) {
+      replaceChildren(this.content, h('div', { className: 'empty-state' }, t('components.cii.noSignals')));
+      return;
+    }
+
+    const listEl = h('div', { className: 'cii-list' }, ...withData.map(s => this.buildCountry(s)));
+    replaceChildren(this.content, listEl);
+    this.bindShareButtons();
+    console.log(`[CIIPanel] Rendered ${withData.length} countries from bootstrap`);
   }
 
   public getScores(): CountryScore[] {
