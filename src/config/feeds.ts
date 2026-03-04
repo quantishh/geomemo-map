@@ -1025,8 +1025,7 @@ const FINANCE_FEEDS: Record<string, Feed[]> = {
   ],
 };
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const HAPPY_FEEDS: Record<string, Feed[]> = {
+const _HAPPY_FEEDS: Record<string, Feed[]> = {
   positive: [
     { name: 'Good News Network', url: rss('https://www.goodnewsnetwork.org/feed/') },
     { name: 'Positive.News', url: rss('https://www.positive.news/feed/') },

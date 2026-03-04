@@ -131,6 +131,7 @@ const layers = {
   geopoliticalBoundaries: false,
   ciiChoropleth: false,
   dayNight: false,
+  geomemoIntel: false,
 };
 
 await initI18n();
