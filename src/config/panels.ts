@@ -465,6 +465,7 @@ const FINANCE_MOBILE_MAP_LAYERS: MapLayers = {
 // HAPPY VARIANT (Good News & Progress)
 // kept for backward compatibility but not used
 // ============================================
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const HAPPY_PANELS: Record<string, PanelConfig> = {
   map: { name: 'World Map', enabled: true, priority: 1 },
   'positive-feed': { name: 'Good News Feed', enabled: true, priority: 1 },
@@ -478,6 +479,7 @@ const HAPPY_PANELS: Record<string, PanelConfig> = {
   giving: { name: 'Global Giving', enabled: true, priority: 1 },
 };
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const HAPPY_MAP_LAYERS: MapLayers = {
   gpsJamming: false,
   geopoliticalBoundaries: false,
@@ -532,6 +534,7 @@ const HAPPY_MAP_LAYERS: MapLayers = {
   geomemoIntel: false,
 };
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const HAPPY_MOBILE_MAP_LAYERS: MapLayers = {
   gpsJamming: false,
   geopoliticalBoundaries: false,

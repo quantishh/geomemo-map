@@ -2489,9 +2489,8 @@ export class DeckGLMap {
       data: this.geomemoArticles,
       getPosition: (d) => d.coordinates,
       getRadius: 15000,
-      getFillColor: (d) =>
-        DeckGLMap.GEOMEMO_CATEGORY_COLORS[d.category] ||
-        DeckGLMap.GEOMEMO_CATEGORY_COLORS['Other'],
+      getFillColor: (d): [number, number, number, number] =>
+        DeckGLMap.GEOMEMO_CATEGORY_COLORS[d.category] ?? [156, 163, 175, 180],
       radiusMinPixels: 5,
       radiusMaxPixels: 14,
       pickable: true,
