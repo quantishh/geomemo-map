@@ -1,7 +1,7 @@
 import type { MapLayers } from '@/types';
 
 export type MapRenderer = 'flat' | 'globe';
-export type MapVariant = 'full' | 'tech' | 'finance' | 'happy';
+export type MapVariant = 'full' | 'tech' | 'finance';
 
 export interface LayerDefinition {
   key: keyof MapLayers;
@@ -61,15 +61,19 @@ export const LAYER_REGISTRY: Record<keyof MapLayers, LayerDefinition> = {
   centralBanks:             def('centralBanks',             '&#127974;', 'centralBanks',             'Central Banks'),
   commodityHubs:            def('commodityHubs',            '&#128230;', 'commodityHubs',            'Commodity Hubs'),
   gulfInvestments:          def('gulfInvestments',          '&#127760;', 'gulfInvestments',          'GCC Investments'),
+  // Happy variant layers (kept for type compatibility, not shown in layer selector)
   positiveEvents:           def('positiveEvents',           '&#127775;', 'positiveEvents',           'Positive Events'),
   kindness:                 def('kindness',                 '&#128154;', 'kindness',                 'Acts of Kindness'),
   happiness:                def('happiness',                '&#128522;', 'happiness',                'World Happiness'),
   speciesRecovery:          def('speciesRecovery',          '&#128062;', 'speciesRecovery',          'Species Recovery'),
   renewableInstallations:   def('renewableInstallations',   '&#9889;',   'renewableInstallations',   'Clean Energy'),
+  // GeoMemo Intelligence layer
+  geomemoIntel:             def('geomemoIntel',             '&#128240;', 'geomemoIntel',             'GeoMemo Intelligence'),
 };
 
 const VARIANT_LAYER_ORDER: Record<MapVariant, Array<keyof MapLayers>> = {
   full: [
+    'geomemoIntel',
     'iranAttacks', 'hotspots', 'conflicts', 'geopoliticalBoundaries',
     'bases', 'nuclear', 'irradiators', 'spaceports',
     'cables', 'pipelines', 'datacenters', 'military',
@@ -80,19 +84,17 @@ const VARIANT_LAYER_ORDER: Record<MapVariant, Array<keyof MapLayers>> = {
     'ciiChoropleth', 'dayNight',
   ],
   tech: [
+    'geomemoIntel',
     'startupHubs', 'techHQs', 'accelerators', 'cloudRegions',
     'datacenters', 'cables', 'outages', 'cyberThreats',
     'techEvents', 'natural', 'fires', 'dayNight',
   ],
   finance: [
+    'geomemoIntel',
     'stockExchanges', 'financialCenters', 'centralBanks', 'commodityHubs',
     'gulfInvestments', 'tradeRoutes', 'cables', 'pipelines',
     'outages', 'weather', 'economic', 'waterways',
     'natural', 'cyberThreats', 'dayNight',
-  ],
-  happy: [
-    'positiveEvents', 'kindness', 'happiness',
-    'speciesRecovery', 'renewableInstallations',
   ],
 };
 

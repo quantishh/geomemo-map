@@ -334,23 +334,23 @@ canvas,
 }
 
 .variant-option.active {
-  color: var(--green);
-  background: rgba(68, 255, 136, 0.1);
+  color: #9b59f0;
+  background: rgba(67, 2, 151, 0.15);
   pointer-events: none;
 }
 
 
 .variant-option.active .variant-icon {
-  filter: grayscale(0%) drop-shadow(0 0 4px var(--green));
+  filter: grayscale(0%) drop-shadow(0 0 4px #9b59f0);
 }
 
 .variant-option[data-variant="tech"].active {
-  color: var(--semantic-info);
-  background: rgba(74, 158, 255, 0.1);
+  color: #b07df0;
+  background: rgba(67, 2, 151, 0.12);
 }
 
 .variant-option[data-variant="tech"].active .variant-icon {
-  filter: grayscale(0%) drop-shadow(0 0 4px var(--semantic-info));
+  filter: grayscale(0%) drop-shadow(0 0 4px #b07df0);
 }
 
 .variant-divider {
@@ -540,7 +540,7 @@ canvas,
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: var(--green);
+  background: #9b59f0;
   animation: pulse-dot 2s infinite;
 }
 

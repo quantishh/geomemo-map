@@ -1064,9 +1064,7 @@ export const FEEDS = SITE_VARIANT === 'tech'
   ? TECH_FEEDS
   : SITE_VARIANT === 'finance'
     ? FINANCE_FEEDS
-    : SITE_VARIANT === 'happy'
-      ? HAPPY_FEEDS
-      : FULL_FEEDS;
+    : FULL_FEEDS;
 
 export const SOURCE_REGION_MAP: Record<string, { labelKey: string; feedKeys: string[] }> = {
   // Full (geopolitical) variant regions

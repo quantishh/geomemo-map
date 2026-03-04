@@ -108,6 +108,7 @@ const FULL_MAP_LAYERS: MapLayers = {
   tradeRoutes: false,
   ciiChoropleth: false,
   dayNight: false,
+  geomemoIntel: true,
 };
 
 const FULL_MOBILE_MAP_LAYERS: MapLayers = {
@@ -161,6 +162,7 @@ const FULL_MOBILE_MAP_LAYERS: MapLayers = {
   tradeRoutes: false,
   ciiChoropleth: false,
   dayNight: false,
+  geomemoIntel: true,
 };
 
 // ============================================
@@ -255,6 +257,7 @@ const TECH_MAP_LAYERS: MapLayers = {
   iranAttacks: false,
   ciiChoropleth: false,
   dayNight: false,
+  geomemoIntel: true,
 };
 
 const TECH_MOBILE_MAP_LAYERS: MapLayers = {
@@ -308,6 +311,7 @@ const TECH_MOBILE_MAP_LAYERS: MapLayers = {
   iranAttacks: false,
   ciiChoropleth: false,
   dayNight: false,
+  geomemoIntel: true,
 };
 
 // ============================================
@@ -400,6 +404,7 @@ const FINANCE_MAP_LAYERS: MapLayers = {
   iranAttacks: false,
   ciiChoropleth: false,
   dayNight: false,
+  geomemoIntel: true,
 };
 
 const FINANCE_MOBILE_MAP_LAYERS: MapLayers = {
@@ -453,10 +458,12 @@ const FINANCE_MOBILE_MAP_LAYERS: MapLayers = {
   iranAttacks: false,
   ciiChoropleth: false,
   dayNight: false,
+  geomemoIntel: true,
 };
 
 // ============================================
 // HAPPY VARIANT (Good News & Progress)
+// kept for backward compatibility but not used
 // ============================================
 const HAPPY_PANELS: Record<string, PanelConfig> = {
   map: { name: 'World Map', enabled: true, priority: 1 },
@@ -522,6 +529,7 @@ const HAPPY_MAP_LAYERS: MapLayers = {
   iranAttacks: false,
   ciiChoropleth: false,
   dayNight: false,
+  geomemoIntel: false,
 };
 
 const HAPPY_MOBILE_MAP_LAYERS: MapLayers = {
@@ -575,14 +583,15 @@ const HAPPY_MOBILE_MAP_LAYERS: MapLayers = {
   iranAttacks: false,
   ciiChoropleth: false,
   dayNight: false,
+  geomemoIntel: false,
 };
 
 // ============================================
 // VARIANT-AWARE EXPORTS
 // ============================================
-export const DEFAULT_PANELS = SITE_VARIANT === 'happy' ? HAPPY_PANELS : SITE_VARIANT === 'tech' ? TECH_PANELS : SITE_VARIANT === 'finance' ? FINANCE_PANELS : FULL_PANELS;
-export const DEFAULT_MAP_LAYERS = SITE_VARIANT === 'happy' ? HAPPY_MAP_LAYERS : SITE_VARIANT === 'tech' ? TECH_MAP_LAYERS : SITE_VARIANT === 'finance' ? FINANCE_MAP_LAYERS : FULL_MAP_LAYERS;
-export const MOBILE_DEFAULT_MAP_LAYERS = SITE_VARIANT === 'happy' ? HAPPY_MOBILE_MAP_LAYERS : SITE_VARIANT === 'tech' ? TECH_MOBILE_MAP_LAYERS : SITE_VARIANT === 'finance' ? FINANCE_MOBILE_MAP_LAYERS : FULL_MOBILE_MAP_LAYERS;
+export const DEFAULT_PANELS = SITE_VARIANT === 'tech' ? TECH_PANELS : SITE_VARIANT === 'finance' ? FINANCE_PANELS : FULL_PANELS;
+export const DEFAULT_MAP_LAYERS = SITE_VARIANT === 'tech' ? TECH_MAP_LAYERS : SITE_VARIANT === 'finance' ? FINANCE_MAP_LAYERS : FULL_MAP_LAYERS;
+export const MOBILE_DEFAULT_MAP_LAYERS = SITE_VARIANT === 'tech' ? TECH_MOBILE_MAP_LAYERS : SITE_VARIANT === 'finance' ? FINANCE_MOBILE_MAP_LAYERS : FULL_MOBILE_MAP_LAYERS;
 
 /** Maps map-layer toggle keys to their data-freshness source IDs (single source of truth). */
 export const LAYER_TO_SOURCE: Partial<Record<keyof MapLayers, DataSourceId[]>> = {
