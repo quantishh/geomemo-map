@@ -11,6 +11,7 @@ import {
   SITE_VARIANT,
   LAYER_TO_SOURCE,
 } from '@/config';
+import { GEOMEMO_REGION_MAP, matchesRegionFilter } from '@/config/geomemo-regions';
 import { INTEL_HOTSPOTS, CONFLICT_ZONES } from '@/config/geo';
 import { tokenizeForMatch, matchKeyword } from '@/utils/keyword-match';
 import {
@@ -903,6 +904,21 @@ export class DataLoaderManager implements AppModule {
             console.error('[App] Intel feed failed:', intelResult[0]?.reason);
           }
         }
+      }
+    }
+
+    // Supplement panels with GeoMemo's curated articles (country-coded, last 24h)
+    if (SITE_VARIANT === 'full') {
+      try {
+        const geomemoItems = await this.loadGeomemoRegionalFeed();
+        if (geomemoItems.length > 0) {
+          // Deduplicate before adding to global collection
+          const existingUrls = new Set(collectedNews.map(i => i.link));
+          const newGeomemo = geomemoItems.filter(i => !existingUrls.has(i.link));
+          collectedNews.push(...newGeomemo);
+        }
+      } catch (e) {
+        console.warn('[App] GeoMemo regional feed error (non-fatal):', e);
       }
     }
 
@@ -2363,6 +2379,81 @@ export class DataLoaderManager implements AppModule {
       (this.ctx.panels['telegram-intel'] as TelegramIntelPanel)?.setData(result);
     } catch (error) {
       console.error('[App] Telegram intel fetch failed:', error);
+    }
+  }
+
+  /**
+   * Fetch GeoMemo's curated articles and distribute them into regional news panels.
+   * Returns all NewsItems created so they can be merged into allNews.
+   */
+  async loadGeomemoRegionalFeed(): Promise<NewsItem[]> {
+    try {
+      const res = await fetch('/api/geomemo-regional?hours=24');
+      if (!res.ok) {
+        console.warn('[App] GeoMemo regional feed returned', res.status);
+        return [];
+      }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const articles: any[] = await res.json();
+      if (!Array.isArray(articles) || articles.length === 0) {
+        console.warn('[App] GeoMemo regional feed: no articles');
+        return [];
+      }
+
+      // Convert GeoMemo articles → NewsItem[]
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const allItems: NewsItem[] = articles.map((a: any) => ({
+        source: a.source || 'GeoMemo',
+        title: a.headline || '',
+        link: a.url || '',
+        pubDate: new Date(a.scraped_at),
+        isAlert: false,
+        tier: 2,
+      }));
+
+      let totalRendered = 0;
+
+      for (const [category, filter] of Object.entries(GEOMEMO_REGION_MAP)) {
+        const panel = this.ctx.newsPanels[category];
+        if (!panel) continue;
+
+        // Filter articles matching this region/topic
+        const matching = articles
+          .filter(a => matchesRegionFilter(filter, a.country_codes || [], a.category || ''))
+          .map(a => ({
+            source: a.source || 'GeoMemo',
+            title: a.headline || '',
+            link: a.url || '',
+            pubDate: new Date(a.scraped_at),
+            isAlert: false,
+            tier: 2,
+          } as NewsItem));
+
+        if (matching.length === 0) continue;
+
+        // Merge with any existing RSS items for this category
+        const existing = this.ctx.newsByCategory[category] || [];
+        // Deduplicate by URL
+        const existingUrls = new Set(existing.map(i => i.link));
+        const newItems = matching.filter(i => !existingUrls.has(i.link));
+        const merged = [...existing, ...newItems].sort(
+          (a, b) => b.pubDate.getTime() - a.pubDate.getTime()
+        );
+
+        this.renderNewsForCategory(category, merged);
+        totalRendered += newItems.length;
+
+        this.ctx.statusPanel?.updateFeed(
+          category.charAt(0).toUpperCase() + category.slice(1),
+          { status: 'ok', itemCount: merged.length },
+        );
+      }
+
+      console.log(`[App] GeoMemo regional: ${articles.length} articles → ${totalRendered} items distributed across panels`);
+      return allItems;
+    } catch (error) {
+      console.error('[App] GeoMemo regional feed failed:', error);
+      return [];
     }
   }
 
