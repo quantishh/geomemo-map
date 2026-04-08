@@ -189,7 +189,7 @@
   .preset-btn.active { background: var(--overlay-medium); border-color: var(--link-color); color: var(--accent); }
 
   /* ============================================================
-     MOCK PANEL — exact WorldMonitor styling
+     MOCK PANEL — exact GeoMemo Monitor styling
      ============================================================ */
   .mock-panel {
     width: 380px;
@@ -679,7 +679,7 @@ function updatePrompt() {
 
   const el = document.getElementById('prompt-text');
   if (parts.length === 0) {
-    el.textContent = 'Build the AI Flow Settings popup with defaults: 280px wide, 6px border-radius, 12px gear icon (45deg hover rotation), 32x18px iOS toggle switches. Green (#22c55e) for active, orange (#f59e0b) for 250MB warning, blue (#60a5fa) for CTA link. Dark theme with WorldMonitor design tokens.';
+    el.textContent = 'Build the AI Flow Settings popup with defaults: 280px wide, 6px border-radius, 12px gear icon (45deg hover rotation), 32x18px iOS toggle switches. Green (#22c55e) for active, orange (#f59e0b) for 250MB warning, blue (#60a5fa) for CTA link. Dark theme with GeoMemo Monitor design tokens.';
   } else {
     el.textContent = `Build the AI Flow Settings popup with: ${parts.join(', ')}. All other values at defaults.`;
   }

@@ -1,6 +1,6 @@
 {
   "app": {
-    "title": "World Monitor",
+    "title": "GeoMemo Monitor",
     "description": "Tình hình Toàn cầu với Phân tích AI"
   },
   "countryBrief": {
@@ -396,7 +396,7 @@
         "OLLAMA_API_URL": "Ví dụ: http://127.0.0.1:11434 (Ollama) hoặc http://127.0.0.1:1234/v1 (LM Studio) — endpoint tương thích OpenAI.",
         "OLLAMA_MODEL": "Ví dụ: llama3.1:8b — thẻ mô hình dùng để tóm tắt."
       },
-      "skipSetup": "Bỏ qua cài đặt — một giấy phép World Monitor mở khóa tất cả. Tham gia danh sách chờ để truy cập sớm."
+      "skipSetup": "Bỏ qua cài đặt — một giấy phép GeoMemo Monitor mở khóa tất cả. Tham gia danh sách chờ để truy cập sớm."
     },
     "settingsWindow": {
       "validating": "Đang xác thực khóa API...",
@@ -430,11 +430,11 @@
         "byokDescription": "Muốn kiểm soát hoàn toàn? Đến tab Khóa API và LLM để cấu hình từng nguồn dữ liệu và nhà cung cấp AI riêng lẻ.",
         "byokTitle": "Hoặc sử dụng khóa của riêng bạn",
         "dividerOr": "HOẶC",
-        "heroDescription": "Một giấy phép World Monitor thay thế mọi khóa API và nhà cung cấp LLM mà bạn phải tự cấu hình. Tóm tắt AI, tình báo thời gian thực, dữ liệu thị trường, theo dõi xung đột, phát hiện cháy, ảnh vệ tinh — tất cả được vận hành, quản lý, không cần cài đặt.",
+        "heroDescription": "Một giấy phép GeoMemo Monitor thay thế mọi khóa API và nhà cung cấp LLM mà bạn phải tự cấu hình. Tóm tắt AI, tình báo thời gian thực, dữ liệu thị trường, theo dõi xung đột, phát hiện cháy, ảnh vệ tinh — tất cả được vận hành, quản lý, không cần cài đặt.",
         "heroTitle": "Một khóa. Bao gồm tất cả.",
         "register": {
           "alreadyRegistered": "Bạn đã có trong danh sách chờ.",
-          "description": "Chúng tôi đang chuẩn bị ra mắt giấy phép World Monitor. Đăng ký ngay để được ưu tiên — thành viên sớm được quyền truy cập trước và giá ưu đãi.",
+          "description": "Chúng tôi đang chuẩn bị ra mắt giấy phép GeoMemo Monitor. Đăng ký ngay để được ưu tiên — thành viên sớm được quyền truy cập trước và giá ưu đãi.",
           "emailPlaceholder": "email@cuaban.com",
           "error": "Đăng ký thất bại. Vui lòng thử lại.",
           "invalidEmail": "Vui lòng nhập địa chỉ email hợp lệ.",
@@ -443,7 +443,7 @@
           "success": "Bạn đã vào danh sách! Chúng tôi sẽ thông báo cho bạn đầu tiên.",
           "title": "Đặt chỗ của bạn"
         },
-        "tabLabel": "World Monitor"
+        "tabLabel": "GeoMemo Monitor"
       }
     },
     "countryIntel": {

@@ -1,7 +1,7 @@
 /**
- * GeoMemo Regional Feed → WorldMonitor Panel Mapping
+ * GeoMemo Regional Feed → GeoMemo Monitor Panel Mapping
  *
- * Maps each WorldMonitor panel category key to the filtering criteria
+ * Maps each GeoMemo Monitor panel category key to the filtering criteria
  * used to route GeoMemo articles into the correct panel.
  *
  * - countryCodes: article must have at least one matching country_code
@@ -58,7 +58,7 @@ const ASIA_PACIFIC_CODES = new Set([
 // ── Panel → Filter mapping ───────────────────────────────────────
 
 /**
- * Maps WorldMonitor panel category keys to their GeoMemo article filters.
+ * Maps GeoMemo Monitor panel category keys to their GeoMemo article filters.
  * Only panels we actively populate are listed here.
  */
 export const GEOMEMO_REGION_MAP: Record<string, RegionFilter> = {

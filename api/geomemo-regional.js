@@ -2,7 +2,7 @@
  * GeoMemo Regional Feed — Vercel serverless proxy
  *
  * Proxies requests to the GeoMemo backend API to fetch curated articles
- * as a flat JSON array for WorldMonitor regional news panels.
+ * as a flat JSON array for GeoMemo Monitor regional news panels.
  * Caches for 5 minutes.
  *
  * Usage: GET /api/geomemo-regional?hours=24
