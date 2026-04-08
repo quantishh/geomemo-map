@@ -109,6 +109,9 @@ const FULL_MAP_LAYERS: MapLayers = {
   ciiChoropleth: false,
   dayNight: false,
   geomemoIntel: true,
+  geomemoConflicts: false,
+  geomemoArmsFlows: false,
+  geomemoStability: false,
 };
 
 const FULL_MOBILE_MAP_LAYERS: MapLayers = {
@@ -163,6 +166,9 @@ const FULL_MOBILE_MAP_LAYERS: MapLayers = {
   ciiChoropleth: false,
   dayNight: false,
   geomemoIntel: true,
+  geomemoConflicts: false,
+  geomemoArmsFlows: false,
+  geomemoStability: false,
 };
 
 // ============================================
@@ -258,6 +264,9 @@ const TECH_MAP_LAYERS: MapLayers = {
   ciiChoropleth: false,
   dayNight: false,
   geomemoIntel: true,
+  geomemoConflicts: false,
+  geomemoArmsFlows: false,
+  geomemoStability: false,
 };
 
 const TECH_MOBILE_MAP_LAYERS: MapLayers = {
@@ -312,6 +321,9 @@ const TECH_MOBILE_MAP_LAYERS: MapLayers = {
   ciiChoropleth: false,
   dayNight: false,
   geomemoIntel: true,
+  geomemoConflicts: false,
+  geomemoArmsFlows: false,
+  geomemoStability: false,
 };
 
 // ============================================
@@ -405,6 +417,9 @@ const FINANCE_MAP_LAYERS: MapLayers = {
   ciiChoropleth: false,
   dayNight: false,
   geomemoIntel: true,
+  geomemoConflicts: false,
+  geomemoArmsFlows: false,
+  geomemoStability: false,
 };
 
 const FINANCE_MOBILE_MAP_LAYERS: MapLayers = {
@@ -459,6 +474,9 @@ const FINANCE_MOBILE_MAP_LAYERS: MapLayers = {
   ciiChoropleth: false,
   dayNight: false,
   geomemoIntel: true,
+  geomemoConflicts: false,
+  geomemoArmsFlows: false,
+  geomemoStability: false,
 };
 
 // ============================================
@@ -530,6 +548,9 @@ export const _HAPPY_MAP_LAYERS: MapLayers = {
   ciiChoropleth: false,
   dayNight: false,
   geomemoIntel: false,
+  geomemoConflicts: false,
+  geomemoArmsFlows: false,
+  geomemoStability: false,
 };
 
 export const _HAPPY_MOBILE_MAP_LAYERS: MapLayers = {
@@ -584,6 +605,9 @@ export const _HAPPY_MOBILE_MAP_LAYERS: MapLayers = {
   ciiChoropleth: false,
   dayNight: false,
   geomemoIntel: false,
+  geomemoConflicts: false,
+  geomemoArmsFlows: false,
+  geomemoStability: false,
 };
 
 // ============================================

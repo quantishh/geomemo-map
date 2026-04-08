@@ -264,6 +264,9 @@ export const DEFAULT_MAP_LAYERS: MapLayers = {
   ciiChoropleth: false,
   dayNight: false,
   geomemoIntel: true,
+  geomemoConflicts: false,
+  geomemoArmsFlows: false,
+  geomemoStability: false,
 };
 
 // Mobile defaults for tech variant
@@ -318,6 +321,9 @@ export const MOBILE_DEFAULT_MAP_LAYERS: MapLayers = {
   ciiChoropleth: false,
   dayNight: false,
   geomemoIntel: true,
+  geomemoConflicts: false,
+  geomemoArmsFlows: false,
+  geomemoStability: false,
 };
 
 export const VARIANT_CONFIG: VariantConfig = {

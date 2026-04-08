@@ -572,8 +572,11 @@ export interface MapLayers {
   ciiChoropleth: boolean;
   // Overlay layers
   dayNight: boolean;
-  // GeoMemo Intelligence layer
+  // GeoMemo Intelligence layers
   geomemoIntel: boolean;
+  geomemoConflicts: boolean;
+  geomemoArmsFlows: boolean;
+  geomemoStability: boolean;
 }
 
 export interface AIDataCenter {

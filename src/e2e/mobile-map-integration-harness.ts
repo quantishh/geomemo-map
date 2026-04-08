@@ -132,6 +132,9 @@ const layers = {
   ciiChoropleth: false,
   dayNight: false,
   geomemoIntel: false,
+  geomemoConflicts: false,
+  geomemoArmsFlows: false,
+  geomemoStability: false,
 };
 
 await initI18n();

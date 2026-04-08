@@ -183,6 +183,9 @@ const allLayersEnabled: MapLayers = {
   ciiChoropleth: false,
   dayNight: true,
   geomemoIntel: true,
+  geomemoConflicts: false,
+  geomemoArmsFlows: false,
+  geomemoStability: false,
 };
 
 const allLayersDisabled: MapLayers = {
@@ -233,6 +236,9 @@ const allLayersDisabled: MapLayers = {
   ciiChoropleth: false,
   dayNight: false,
   geomemoIntel: false,
+  geomemoConflicts: false,
+  geomemoArmsFlows: false,
+  geomemoStability: false,
 };
 
 const SEEDED_NEWS_LOCATIONS: Array<{

@@ -375,9 +375,18 @@ export class DataLoaderManager implements AppModule {
     if (SITE_VARIANT !== 'happy') tasks.push({ name: 'iranAttacks', task: runGuarded('iranAttacks', () => this.loadIranEvents()) });
     if (SITE_VARIANT !== 'happy' && (this.ctx.mapLayers.techEvents || SITE_VARIANT === 'tech')) tasks.push({ name: 'techEvents', task: runGuarded('techEvents', () => this.loadTechEvents()) });
 
-    // GeoMemo Intelligence layer (all non-happy variants)
+    // GeoMemo Intelligence layers (all non-happy variants)
     if (SITE_VARIANT !== 'happy' && this.ctx.mapLayers.geomemoIntel) {
       tasks.push({ name: 'geomemoIntel', task: runGuarded('geomemoIntel', () => this.loadGeomemoArticles()) });
+    }
+    if (SITE_VARIANT !== 'happy' && this.ctx.mapLayers.geomemoConflicts) {
+      tasks.push({ name: 'geomemoConflicts', task: runGuarded('geomemoConflicts', () => this.loadGeomemoConflicts()) });
+    }
+    if (SITE_VARIANT !== 'happy' && this.ctx.mapLayers.geomemoArmsFlows) {
+      tasks.push({ name: 'geomemoArmsFlows', task: runGuarded('geomemoArmsFlows', () => this.loadGeomemoArmsFlows()) });
+    }
+    if (SITE_VARIANT !== 'happy' && this.ctx.mapLayers.geomemoStability) {
+      tasks.push({ name: 'geomemoStability', task: runGuarded('geomemoStability', () => this.loadGeomemoStability()) });
     }
 
     if (SITE_VARIANT === 'tech') {
@@ -447,6 +456,15 @@ export class DataLoaderManager implements AppModule {
           break;
         case 'geomemoIntel':
           await this.loadGeomemoArticles();
+          break;
+        case 'geomemoConflicts':
+          await this.loadGeomemoConflicts();
+          break;
+        case 'geomemoArmsFlows':
+          await this.loadGeomemoArmsFlows();
+          break;
+        case 'geomemoStability':
+          await this.loadGeomemoStability();
           break;
         case 'ucdpEvents':
         case 'displacement':
@@ -2454,6 +2472,63 @@ export class DataLoaderManager implements AppModule {
     } catch (error) {
       console.error('[App] GeoMemo regional feed failed:', error);
       return [];
+    }
+  }
+
+  async loadGeomemoConflicts(): Promise<void> {
+    try {
+      const res = await fetch('/api/geomemo-intel?type=conflicts&limit=200');
+      if (!res.ok) {
+        console.warn('[App] GeoMemo conflicts API returned', res.status);
+        return;
+      }
+      const data = await res.json();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const conflicts = (Array.isArray(data) ? data : data?.conflicts ?? data?.data ?? []) as any[];
+      this.ctx.map?.setGeomemoConflicts(conflicts);
+      this.ctx.map?.setLayerReady('geomemoConflicts', conflicts.length > 0);
+      console.log(`[App] GeoMemo: loaded ${conflicts.length} conflicts for map`);
+    } catch (error) {
+      console.error('[App] GeoMemo conflicts fetch failed:', error);
+      this.ctx.map?.setGeomemoConflicts([]);
+    }
+  }
+
+  async loadGeomemoArmsFlows(): Promise<void> {
+    try {
+      const res = await fetch('/api/geomemo-intel?type=transfers&limit=200');
+      if (!res.ok) {
+        console.warn('[App] GeoMemo transfers API returned', res.status);
+        return;
+      }
+      const data = await res.json();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const transfers = (Array.isArray(data) ? data : data?.transfers ?? data?.data ?? []) as any[];
+      this.ctx.map?.setGeomemoArmsFlows(transfers);
+      this.ctx.map?.setLayerReady('geomemoArmsFlows', transfers.length > 0);
+      console.log(`[App] GeoMemo: loaded ${transfers.length} arms transfers for map`);
+    } catch (error) {
+      console.error('[App] GeoMemo arms flows fetch failed:', error);
+      this.ctx.map?.setGeomemoArmsFlows([]);
+    }
+  }
+
+  async loadGeomemoStability(): Promise<void> {
+    try {
+      const res = await fetch('/api/geomemo-intel?type=stability');
+      if (!res.ok) {
+        console.warn('[App] GeoMemo stability API returned', res.status);
+        return;
+      }
+      const data = await res.json();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const rankings = (Array.isArray(data) ? data : data?.rankings ?? data?.data ?? []) as any[];
+      this.ctx.map?.setGeomemoStability(rankings);
+      this.ctx.map?.setLayerReady('geomemoStability', rankings.length > 0);
+      console.log(`[App] GeoMemo: loaded ${rankings.length} stability rankings for map`);
+    } catch (error) {
+      console.error('[App] GeoMemo stability fetch failed:', error);
+      this.ctx.map?.setGeomemoStability([]);
     }
   }
 

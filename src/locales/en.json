@@ -1031,7 +1031,11 @@
         "kindness": "Acts of Kindness",
         "happiness": "World Happiness",
         "speciesRecovery": "Species Recovery",
-        "renewableInstallations": "Clean Energy"
+        "renewableInstallations": "Clean Energy",
+        "geomemoIntel": "GeoMemo Intelligence",
+        "geomemoConflicts": "GeoMemo Conflicts",
+        "geomemoArmsFlows": "GeoMemo Arms Flows",
+        "geomemoStability": "GeoMemo Stability"
       },
       "tooltip": {
         "earthquake": "Earthquake",

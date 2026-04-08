@@ -67,13 +67,16 @@ export const LAYER_REGISTRY: Record<keyof MapLayers, LayerDefinition> = {
   happiness:                def('happiness',                '&#128522;', 'happiness',                'World Happiness'),
   speciesRecovery:          def('speciesRecovery',          '&#128062;', 'speciesRecovery',          'Species Recovery'),
   renewableInstallations:   def('renewableInstallations',   '&#9889;',   'renewableInstallations',   'Clean Energy'),
-  // GeoMemo Intelligence layer
+  // GeoMemo Intelligence layers
   geomemoIntel:             def('geomemoIntel',             '&#128240;', 'geomemoIntel',             'GeoMemo Intelligence'),
+  geomemoConflicts:         def('geomemoConflicts',         '&#128165;', 'geomemoConflicts',         'GeoMemo Conflicts'),
+  geomemoArmsFlows:         def('geomemoArmsFlows',         '&#128299;', 'geomemoArmsFlows',         'GeoMemo Arms Flows'),
+  geomemoStability:         def('geomemoStability',         '&#127758;', 'geomemoStability',         'GeoMemo Stability'),
 };
 
 const VARIANT_LAYER_ORDER: Record<MapVariant, Array<keyof MapLayers>> = {
   full: [
-    'geomemoIntel',
+    'geomemoIntel', 'geomemoConflicts', 'geomemoArmsFlows', 'geomemoStability',
     'iranAttacks', 'hotspots', 'conflicts', 'geopoliticalBoundaries',
     'bases', 'nuclear', 'irradiators', 'spaceports',
     'cables', 'pipelines', 'datacenters', 'military',
@@ -84,13 +87,13 @@ const VARIANT_LAYER_ORDER: Record<MapVariant, Array<keyof MapLayers>> = {
     'ciiChoropleth', 'dayNight',
   ],
   tech: [
-    'geomemoIntel',
+    'geomemoIntel', 'geomemoConflicts', 'geomemoArmsFlows', 'geomemoStability',
     'startupHubs', 'techHQs', 'accelerators', 'cloudRegions',
     'datacenters', 'cables', 'outages', 'cyberThreats',
     'techEvents', 'natural', 'fires', 'dayNight',
   ],
   finance: [
-    'geomemoIntel',
+    'geomemoIntel', 'geomemoConflicts', 'geomemoArmsFlows', 'geomemoStability',
     'stockExchanges', 'financialCenters', 'centralBanks', 'commodityHubs',
     'gulfInvestments', 'tradeRoutes', 'cables', 'pipelines',
     'outages', 'weather', 'economic', 'waterways',

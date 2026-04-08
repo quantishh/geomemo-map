@@ -321,7 +321,14 @@ export class DeckGLMap {
   private positiveEvents: PositiveGeoEvent[] = [];
   private kindnessPoints: KindnessPoint[] = [];
 
-  // GeoMemo Intelligence layer data
+  // GeoMemo Intelligence layer data — conflicts, arms flows, stability
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private geomemoConflicts: any[] = [];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private geomemoArmsFlows: any[] = [];
+  private geomemoStabilityMap: Map<string, { score: number; level: string; country: string }> = new Map();
+
+  // GeoMemo news articles layer data
   private geomemoArticles: Array<{
     id: number;
     headline: string;
@@ -1065,9 +1072,19 @@ export class DeckGLMap {
     // UCDP is a historical dataset (events aged months); time-range filter always zeroes it out
     const filteredUcdpEvents = mapLayers.ucdpEvents ? this.ucdpEvents : [];
 
-    // GeoMemo Intelligence layer
+    // GeoMemo Intelligence layers
     if (mapLayers.geomemoIntel && this.geomemoArticles.length > 0) {
       layers.push(this.createGeomemoIntelLayer());
+    }
+    if (mapLayers.geomemoConflicts && this.geomemoConflicts.length > 0) {
+      layers.push(this.createGeomemoConflictsLayer());
+    }
+    if (mapLayers.geomemoArmsFlows && this.geomemoArmsFlows.length > 0) {
+      layers.push(this.createGeomemoArmsFlowsLayer());
+    }
+    if (mapLayers.geomemoStability && this.geomemoStabilityMap.size > 0) {
+      const stabLayer = this.createGeomemoStabilityLayer();
+      if (stabLayer) layers.push(stabLayer);
     }
 
     // Day/night overlay (rendered first as background)
@@ -2501,6 +2518,148 @@ export class DeckGLMap {
     });
   }
 
+  // Country centroids for arms flows arc layer (ISO Alpha-2 → [lon, lat])
+  private static readonly COUNTRY_CENTROIDS: Record<string, [number, number]> = {
+    US: [-98.58, 39.83], RU: [37.62, 55.75], CN: [116.40, 39.91], GB: [-0.12, 51.51],
+    FR: [2.35, 48.86], DE: [13.41, 52.52], IL: [35.22, 31.77], IR: [51.39, 35.69],
+    IN: [77.21, 28.61], PK: [73.05, 33.69], SA: [46.72, 24.69], UA: [30.52, 50.45],
+    TR: [32.87, 39.93], EG: [31.24, 30.04], KR: [126.98, 37.57], KP: [125.75, 39.02],
+    JP: [139.69, 35.69], TW: [121.56, 25.03], AU: [149.13, -35.28], BR: [-47.87, -15.79],
+    CA: [-75.70, 45.42], IT: [12.50, 41.90], ES: [-3.70, 40.42], PL: [21.01, 52.23],
+    SE: [18.07, 59.33], NO: [10.75, 59.91], NL: [4.90, 52.37], BE: [4.35, 50.85],
+    CH: [7.45, 46.95], AT: [16.37, 48.21], GR: [23.73, 37.97], CZ: [14.42, 50.08],
+    RO: [26.10, 44.43], BG: [23.32, 42.70], HU: [19.04, 47.50], SK: [17.11, 48.15],
+    ZA: [28.04, -26.20], NG: [3.39, 6.45], KE: [36.82, -1.29], ET: [38.75, 9.02],
+    MX: [-99.13, 19.43], AR: [-58.38, -34.60], CO: [-74.07, 4.71], VE: [-66.90, 10.48],
+    IQ: [44.37, 33.31], SY: [36.28, 33.51], AF: [69.17, 34.53], LY: [13.18, 32.90],
+    YE: [44.21, 15.35], JO: [35.93, 31.95], LB: [35.50, 33.89], AE: [54.37, 24.45],
+    QA: [51.53, 25.29], KW: [47.98, 29.38], BH: [50.59, 26.22], OM: [58.39, 23.59],
+    TH: [100.52, 13.76], VN: [105.85, 21.03], PH: [120.98, 14.60], MY: [101.69, 3.14],
+    ID: [106.85, -6.21], SG: [103.85, 1.35], MM: [96.17, 16.87], BD: [90.41, 23.81],
+    LK: [79.86, 6.93], NP: [85.32, 27.72], FI: [24.94, 60.17], DK: [12.57, 55.68],
+    IE: [-6.26, 53.35], PT: [-9.14, 38.74], RS: [20.46, 44.82], HR: [15.98, 45.81],
+    BA: [18.41, 43.86], AL: [19.82, 41.33], MK: [21.43, 41.99], ME: [19.26, 42.44],
+    CL: [-70.67, -33.45], PE: [-77.04, -12.05], EC: [-78.52, -0.23], BO: [-68.15, -16.50],
+    UY: [-56.16, -34.90], PY: [-57.64, -25.30], DZ: [3.06, 36.75], MA: [-6.83, 34.02],
+    TN: [10.17, 36.81], SD: [32.53, 15.60], SS: [31.60, 4.85], CD: [15.31, -4.32],
+    AO: [13.23, -8.84], MZ: [32.57, -25.97], TZ: [39.27, -6.81], UG: [32.58, 0.31],
+    GH: [-0.19, 5.56], CM: [11.52, 3.87], CI: [-5.36, 6.83], SN: [-17.44, 14.69],
+    ML: [-7.99, 12.64], BF: [-1.52, 12.37], NE: [2.11, 13.51], TD: [15.04, 12.11],
+    CF: [18.56, 4.36], CG: [15.28, -4.27], GQ: [8.78, 3.75], GA: [9.45, 0.39],
+    KZ: [71.43, 51.13], UZ: [69.28, 41.31], TM: [58.38, 37.95], KG: [74.59, 42.87],
+    TJ: [68.77, 38.56], AZ: [49.87, 40.41], GE: [44.79, 41.72], AM: [44.51, 40.18],
+    BY: [27.57, 53.90], MD: [28.83, 47.01], LT: [25.28, 54.69], LV: [24.11, 56.95],
+    EE: [24.75, 59.44], IS: [-21.90, 64.14], NZ: [174.78, -41.29], FJ: [178.07, -17.78],
+    PG: [147.19, -9.44], CU: [-82.38, 23.14], HT: [-72.34, 18.54], DO: [-69.90, 18.47],
+    SV: [-89.19, 13.69], HN: [-87.22, 14.08], GT: [-90.51, 14.62], NI: [-86.25, 12.11],
+    CR: [-84.09, 9.93], PA: [-79.52, 8.97], SO: [45.34, 2.05], ER: [38.93, 15.34],
+  };
+
+  // GeoMemo Conflicts layer — red pulsing markers sized by escalation_score
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private createGeomemoConflictsLayer(): ScatterplotLayer<any> {
+    return new ScatterplotLayer({
+      id: 'geomemo-conflicts-layer',
+      data: this.geomemoConflicts,
+      getPosition: (d) => {
+        // Use latitude/longitude from conflict data, fall back to country centroid
+        if (d.latitude != null && d.longitude != null) return [d.longitude, d.latitude];
+        if (d.lat != null && d.lon != null) return [d.lon, d.lat];
+        const code = (d.country_code || d.country || '').toUpperCase().slice(0, 2);
+        return DeckGLMap.COUNTRY_CENTROIDS[code] ?? [0, 0];
+      },
+      getRadius: (d) => {
+        const score = d.escalation_score ?? d.severity ?? 50;
+        return 20000 + (score / 100) * 80000;
+      },
+      getFillColor: (d): [number, number, number, number] => {
+        const score = d.escalation_score ?? d.severity ?? 50;
+        if (score >= 80) return [180, 20, 20, 200];
+        if (score >= 60) return [220, 60, 30, 190];
+        if (score >= 40) return [240, 120, 40, 170];
+        return [255, 180, 60, 150];
+      },
+      radiusMinPixels: 6,
+      radiusMaxPixels: 24,
+      pickable: true,
+      stroked: true,
+      getLineColor: [255, 60, 60, 120] as [number, number, number, number],
+      lineWidthMinPixels: 2,
+      antialiasing: true,
+    });
+  }
+
+  // GeoMemo Arms Flows layer — arc lines from seller to buyer
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private createGeomemoArmsFlowsLayer(): ArcLayer<any> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const withCoords = this.geomemoArmsFlows.filter((d: any) => {
+      const sellerCode = (d.seller_country_code || d.seller_country || d.supplier || '').toUpperCase().slice(0, 2);
+      const buyerCode = (d.buyer_country_code || d.buyer_country || d.recipient || '').toUpperCase().slice(0, 2);
+      return DeckGLMap.COUNTRY_CENTROIDS[sellerCode] && DeckGLMap.COUNTRY_CENTROIDS[buyerCode];
+    });
+    const top100 = withCoords.slice(0, 100);
+
+    return new ArcLayer({
+      id: 'geomemo-arms-flows-layer',
+      data: top100,
+      getSourcePosition: (d) => {
+        const code = (d.seller_country_code || d.seller_country || d.supplier || '').toUpperCase().slice(0, 2);
+        return DeckGLMap.COUNTRY_CENTROIDS[code] ?? [0, 0];
+      },
+      getTargetPosition: (d) => {
+        const code = (d.buyer_country_code || d.buyer_country || d.recipient || '').toUpperCase().slice(0, 2);
+        return DeckGLMap.COUNTRY_CENTROIDS[code] ?? [0, 0];
+      },
+      getSourceColor: getCurrentTheme() === 'light' ? [180, 40, 40, 220] : [255, 80, 80, 200],
+      getTargetColor: getCurrentTheme() === 'light' ? [120, 60, 160, 220] : [200, 120, 255, 200],
+      getWidth: (d) => {
+        const value = d.tiv ?? d.value ?? d.quantity ?? 1;
+        return Math.max(1, Math.min(8, Math.log2(value + 1)));
+      },
+      widthMinPixels: 1,
+      widthMaxPixels: 8,
+      pickable: true,
+    });
+  }
+
+  // GeoMemo Stability layer — choropleth coloring countries by stability score
+  private static readonly GEOMEMO_STABILITY_COLORS: Array<{ max: number; color: [number, number, number, number] }> = [
+    { max: 25, color: [40, 180, 60, 130] },      // green — stable
+    { max: 50, color: [220, 200, 50, 140] },      // yellow — moderate
+    { max: 75, color: [240, 140, 30, 150] },      // orange — elevated
+    { max: 100, color: [220, 50, 20, 160] },      // red — high risk
+  ];
+
+  private static readonly GEOMEMO_STABILITY_LEVEL_HEX: Record<string, string> = {
+    stable: '#22c55e', moderate: '#eab308', elevated: '#f59e0b', high: '#dc2626', critical: '#b91c1c',
+  };
+
+  private createGeomemoStabilityLayer(): GeoJsonLayer | null {
+    if (!this.countriesGeoJsonData || this.geomemoStabilityMap.size === 0) return null;
+    const scores = this.geomemoStabilityMap;
+    return new GeoJsonLayer({
+      id: 'geomemo-stability-layer',
+      data: this.countriesGeoJsonData,
+      filled: true,
+      stroked: true,
+      getFillColor: (feature: { properties?: Record<string, unknown> }) => {
+        const code = feature.properties?.['ISO3166-1-Alpha-2'] as string | undefined;
+        if (!code) return [0, 0, 0, 0] as [number, number, number, number];
+        const entry = scores.get(code);
+        if (!entry) return [0, 0, 0, 0] as [number, number, number, number];
+        for (const tier of DeckGLMap.GEOMEMO_STABILITY_COLORS) {
+          if (entry.score <= tier.max) return tier.color;
+        }
+        return [220, 50, 20, 160] as [number, number, number, number];
+      },
+      getLineColor: [80, 80, 80, 40] as [number, number, number, number],
+      lineWidthMinPixels: 0.5,
+      pickable: true,
+      updateTriggers: { getFillColor: [scores.size] },
+    });
+  }
+
   private pulseTime = 0;
 
   private canPulse(now = Date.now()): boolean {
@@ -2978,6 +3137,27 @@ export class DeckGLMap {
         return { html: `<div class="deckgl-tooltip"><strong>${t('components.deckgl.layers.iranAttacks')}: ${text(obj.category || '')}</strong><br/>${text((obj.title || '').slice(0, 80))}</div>` };
       case 'geomemo-intel-layer':
         return { html: `<div class="deckgl-tooltip"><strong>📰 ${text((obj.headline || '').slice(0, 80))}</strong><br/><span style="opacity:.7">${text(obj.source)} · ${text(obj.country)}</span></div>` };
+      case 'geomemo-conflicts-layer': {
+        const cScore = obj.escalation_score ?? obj.severity ?? '?';
+        const cName = obj.name || obj.title || obj.conflict_name || 'Conflict';
+        const cCountry = obj.country || obj.country_code || '';
+        return { html: `<div class="deckgl-tooltip"><strong style="color:#ef4444">💥 ${text(String(cName).slice(0, 80))}</strong><br/>Escalation: <strong>${text(String(cScore))}/100</strong>${cCountry ? `<br/><span style="opacity:.7">${text(cCountry)}</span>` : ''}</div>` };
+      }
+      case 'geomemo-arms-flows-layer': {
+        const seller = obj.seller_country || obj.seller_country_code || obj.supplier || '?';
+        const buyer = obj.buyer_country || obj.buyer_country_code || obj.recipient || '?';
+        const weapon = obj.weapon_description || obj.designation || obj.weapon_type || '';
+        const tiv = obj.tiv ?? obj.value ?? '';
+        return { html: `<div class="deckgl-tooltip"><strong>🔫 Arms Transfer</strong><br/>${text(seller)} → ${text(buyer)}${weapon ? `<br/>${text(String(weapon).slice(0, 60))}` : ''}${tiv ? `<br/>TIV: ${text(String(tiv))}` : ''}</div>` };
+      }
+      case 'geomemo-stability-layer': {
+        const stabName = obj.properties?.name ?? 'Unknown';
+        const stabCode = obj.properties?.['ISO3166-1-Alpha-2'];
+        const stabEntry = stabCode ? this.geomemoStabilityMap.get(stabCode as string) : undefined;
+        if (!stabEntry) return { html: `<div class="deckgl-tooltip"><strong>${text(stabName)}</strong><br/><span style="opacity:.7">No stability data</span></div>` };
+        const stabHex = DeckGLMap.GEOMEMO_STABILITY_LEVEL_HEX[stabEntry.level] ?? '#888';
+        return { html: `<div class="deckgl-tooltip"><strong>${text(stabName)}</strong><br/>Stability: <span style="color:${stabHex};font-weight:600">${stabEntry.score}/100</span><br/><span style="text-transform:capitalize;opacity:.7">${text(stabEntry.level)}</span></div>` };
+      }
       case 'news-locations-layer':
         return { html: `<div class="deckgl-tooltip"><strong>📰 ${t('components.deckgl.tooltip.news')}</strong><br/>${text(obj.title?.slice(0, 80) || '')}</div>` };
       case 'positive-events-layer': {
@@ -3231,6 +3411,50 @@ export class DeckGLMap {
       return;
     }
 
+    // GeoMemo Conflicts: show conflict detail popup
+    if (layerId === 'geomemo-conflicts-layer') {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const conflict = info.object as any;
+      const cScore = conflict.escalation_score ?? conflict.severity ?? '?';
+      const cName = conflict.name || conflict.title || conflict.conflict_name || 'Conflict';
+      const cCountry = conflict.country || conflict.country_code || '';
+      const cType = conflict.type || conflict.conflict_type || '';
+      const cDesc = (conflict.description || conflict.summary || '').slice(0, 300);
+      this.popup.showRawHtml(
+        `<div style="max-width:340px;font-family:system-ui,sans-serif">
+          <div style="font-size:11px;opacity:.6;margin-bottom:4px">💥 GeoMemo Conflict${cCountry ? ` · ${escapeHtml(cCountry)}` : ''}${cType ? ` · ${escapeHtml(cType)}` : ''}</div>
+          <div style="font-size:14px;font-weight:700;line-height:1.3;margin-bottom:6px;color:#ef4444">${escapeHtml(String(cName))}</div>
+          <div style="font-size:12px;margin-bottom:4px">Escalation Score: <strong>${escapeHtml(String(cScore))}/100</strong></div>
+          ${cDesc ? `<div style="font-size:12px;line-height:1.5;opacity:.85">${escapeHtml(cDesc)}</div>` : ''}
+        </div>`,
+        info.x,
+        info.y,
+      );
+      return;
+    }
+
+    // GeoMemo Arms Flows: show transfer detail popup
+    if (layerId === 'geomemo-arms-flows-layer') {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const transfer = info.object as any;
+      const seller = transfer.seller_country || transfer.seller_country_code || transfer.supplier || '?';
+      const buyer = transfer.buyer_country || transfer.buyer_country_code || transfer.recipient || '?';
+      const weapon = transfer.weapon_description || transfer.designation || transfer.weapon_type || '';
+      const tiv = transfer.tiv ?? transfer.value ?? '';
+      const year = transfer.year || transfer.delivery_year || '';
+      this.popup.showRawHtml(
+        `<div style="max-width:340px;font-family:system-ui,sans-serif">
+          <div style="font-size:11px;opacity:.6;margin-bottom:4px">🔫 Arms Transfer${year ? ` · ${escapeHtml(String(year))}` : ''}</div>
+          <div style="font-size:14px;font-weight:700;line-height:1.3;margin-bottom:6px">${escapeHtml(seller)} → ${escapeHtml(buyer)}</div>
+          ${weapon ? `<div style="font-size:12px;margin-bottom:4px">${escapeHtml(String(weapon))}</div>` : ''}
+          ${tiv ? `<div style="font-size:12px;opacity:.7">TIV Value: ${escapeHtml(String(tiv))}</div>` : ''}
+        </div>`,
+        info.x,
+        info.y,
+      );
+      return;
+    }
+
     // Map layer IDs to popup types
     const layerToPopupType: Record<string, PopupType> = {
       'conflict-zones-layer': 'conflict',
@@ -3444,6 +3668,11 @@ export class DeckGLMap {
           if (layer === 'ciiChoropleth') {
             const ciiLeg = this.container.querySelector('#ciiChoroplethLegend') as HTMLElement | null;
             if (ciiLeg) ciiLeg.style.display = (input as HTMLInputElement).checked ? 'block' : 'none';
+          }
+          // Show/hide GeoMemo Stability legend when toggling the stability layer
+          if (layer === 'geomemoStability') {
+            const stabLeg = this.container.querySelector('#geomemoStabilityLegend') as HTMLElement | null;
+            if (stabLeg) stabLeg.style.display = (input as HTMLInputElement).checked ? 'block' : 'none';
           }
         }
       });
@@ -3701,6 +3930,22 @@ export class DeckGLMap {
       </div>
     `;
     legend.appendChild(ciiLegend);
+
+    // GeoMemo Stability gradient legend (shown when layer is active)
+    const stabLegend = document.createElement('div');
+    stabLegend.className = 'cii-choropleth-legend';
+    stabLegend.id = 'geomemoStabilityLegend';
+    stabLegend.style.display = this.state.layers.geomemoStability ? 'block' : 'none';
+    stabLegend.innerHTML = `
+      <span class="legend-label-title" style="font-size:9px;letter-spacing:0.5px;">STABILITY RISK</span>
+      <div style="display:flex;align-items:center;gap:2px;margin-top:2px;">
+        <div style="width:100%;height:8px;border-radius:3px;background:linear-gradient(to right,#28b43c,#dcc832,#f08c1e,#dc3214);"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:8px;opacity:0.7;margin-top:1px;">
+        <span>Stable</span><span>Moderate</span><span>Elevated</span><span>High</span>
+      </div>
+    `;
+    legend.appendChild(stabLegend);
 
     this.container.appendChild(legend);
   }
@@ -4228,6 +4473,38 @@ export class DeckGLMap {
 
   public setGeomemoArticles(articles: typeof this.geomemoArticles): void {
     this.geomemoArticles = articles;
+    this.render();
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public setGeomemoConflicts(conflicts: any[]): void {
+    this.geomemoConflicts = conflicts;
+    this.render();
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public setGeomemoArmsFlows(transfers: any[]): void {
+    this.geomemoArmsFlows = transfers;
+    this.render();
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public setGeomemoStability(rankings: any[]): void {
+    this.geomemoStabilityMap = new Map();
+    for (const entry of rankings) {
+      const code = (entry.country_code || entry.code || '').toUpperCase();
+      if (!code) continue;
+      const score = entry.score ?? entry.stability_score ?? entry.risk_score ?? 0;
+      let level = entry.level || entry.risk_level || '';
+      if (!level) {
+        if (score <= 25) level = 'stable';
+        else if (score <= 50) level = 'moderate';
+        else if (score <= 75) level = 'elevated';
+        else level = 'high';
+      }
+      const country = entry.country || entry.country_name || code;
+      this.geomemoStabilityMap.set(code, { score, level, country });
+    }
     this.render();
   }
 

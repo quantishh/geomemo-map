@@ -466,6 +466,27 @@ export class MapContainer {
     // SVG and Globe maps do not support GeoMemo layer
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public setGeomemoConflicts(conflicts: any[]): void {
+    if (this.useDeckGL) {
+      this.deckGLMap?.setGeomemoConflicts(conflicts);
+    }
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public setGeomemoArmsFlows(transfers: any[]): void {
+    if (this.useDeckGL) {
+      this.deckGLMap?.setGeomemoArmsFlows(transfers);
+    }
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public setGeomemoStability(rankings: any[]): void {
+    if (this.useDeckGL) {
+      this.deckGLMap?.setGeomemoStability(rankings);
+    }
+  }
+
   public updateHotspotActivity(news: NewsItem[]): void {
     if (this.useDeckGL) {
       this.deckGLMap?.updateHotspotActivity(news);
