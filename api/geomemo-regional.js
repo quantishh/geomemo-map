@@ -8,7 +8,7 @@
  * Usage: GET /api/geomemo-regional?hours=24
  */
 
-const GEOMEMO_API_URL = process.env.GEOMEMO_API_URL || 'https://geomemo.news';
+const GEOMEMO_API_URL = process.env.GEOMEMO_API_URL || 'https://api.geomemo.news';
 
 export default async function handler(req, res) {
   // Handle CORS preflight
